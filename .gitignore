@@ -1,0 +1,5 @@
+node_modules/
+# Claude Code's plugin API typings: written by the engine, early access, not ours to ship.
+# Regenerate by loading the plugin-authoring skill and copying types/claude-code.d.ts here.
+src/adapters/claude-code/claude-code.d.ts
+.DS_Store

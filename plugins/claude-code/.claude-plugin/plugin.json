@@ -1,0 +1,54 @@
+{
+  "name": "model-router",
+  "version": "0.1.0",
+  "author": { "name": "Shubham Singh" },
+  "description": "Routes each Claude Code turn to the cheapest model tier and effort that will get it right, using a local decision model, a cheap Claude classifier or a zero-cost heuristic, without throwing away a warm prompt cache.",
+  "userConfig": {
+    "classifier": {
+      "type": "string",
+      "title": "Classifier",
+      "description": "decision: a local decision model (LM Studio /v1/decisions) judges each prompt, nothing billed, prompt text stays on this machine. claude: a Claude model judges it. heuristic: keyword scoring only, instant and free. decision and claude fall back to heuristic when they cannot answer, so a turn is never left unrouted.",
+      "default": "decision",
+      "options": ["decision", "claude", "heuristic"]
+    },
+    "policy": {
+      "type": "string",
+      "title": "Routing policy",
+      "description": "cache-aware: upgrade any time; downgrade only when the steps ahead repay rereading the chat at the cheaper model's cache-write price. always: switch whenever the classifier says so. effort-only: keep the model, tune effort. off: do nothing.",
+      "default": "cache-aware",
+      "options": ["cache-aware", "always", "effort-only", "off"]
+    },
+    "maxTier": {
+      "type": "string",
+      "title": "Highest tier",
+      "description": "Caps the router so a prompt never goes above this tier.",
+      "default": "reasoning",
+      "options": ["simple", "medium", "complex", "reasoning"]
+    },
+    "maxEffort": {
+      "type": "string",
+      "title": "Highest effort",
+      "description": "Effort is capped here on every model that takes one.",
+      "default": "high",
+      "options": ["low", "medium", "high", "xhigh", "max"]
+    },
+    "simpleModel": { "type": "string", "title": "simple tier model", "description": "Trivial and mechanical work.", "default": "claude-haiku-4-5" },
+    "mediumModel": { "type": "string", "title": "medium tier model", "description": "Everyday engineering.", "default": "claude-sonnet-5-5" },
+    "complexModel": { "type": "string", "title": "complex tier model", "description": "Hard engineering.", "default": "claude-opus-5-5" },
+    "reasoningModel": { "type": "string", "title": "reasoning tier model", "description": "Open-ended design; sent at effort high or above.", "default": "claude-opus-5-5" },
+    "classifierModel": { "type": "string", "title": "Claude classifier model", "description": "classifier = claude only. One short call per prompt.", "default": "claude-haiku-4-5" },
+    "localUrl": { "type": "string", "title": "Decision endpoint", "description": "classifier = decision only.", "default": "http://localhost:1234/v1/decisions" },
+    "localModel": { "type": "string", "title": "Decision model id", "description": "classifier = decision only.", "default": "clef-flash" },
+    "coverage": { "type": "number", "title": "Tier coverage", "description": "classifier = decision only: the cheapest tier whose cumulative probability reaches this. Higher is safer and dearer; 0 uses the model's top choice.", "default": 0.8 },
+    "cacheTtlMinutes": { "type": "number", "title": "Prompt cache lifetime (minutes)", "description": "After this much idle time a switch costs nothing extra.", "default": 5 },
+    "expectedSteps": { "type": "number", "title": "Expected steps per prompt", "description": "Model requests a prompt is assumed to take when weighing a downgrade.", "default": 6 },
+    "decisionLog": {
+      "type": "string",
+      "title": "Decision log",
+      "description": "One JSON file per routed turn, replayable with `model-router replay`. full: includes the ask (clipped). metadata: no prompt text. off: nothing written.",
+      "default": "metadata",
+      "options": ["full", "metadata", "off"]
+    },
+    "logDir": { "type": "string", "title": "Decision log folder", "description": "Absolute path. Empty uses ~/.model-router/decisions.", "default": "" }
+  }
+}

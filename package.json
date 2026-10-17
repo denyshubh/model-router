@@ -1,0 +1,21 @@
+{
+  "name": "model-router",
+  "version": "0.1.0",
+  "description": "Routes each agent prompt to the cheapest model tier that will get it right. One core; Claude Code, Copilot CLI and any OpenAI/Anthropic-compatible client as hosts.",
+  "type": "module",
+  "license": "MIT",
+  "bin": {
+    "model-router": "./src/cli.ts"
+  },
+  "scripts": {
+    "test": "bun test ./test/",
+    "typecheck": "tsc --noEmit",
+    "build:plugin": "bun scripts/build-plugin.ts",
+    "serve": "bun src/cli.ts serve",
+    "test:plugin": "bun run build:plugin && claude plugin validate plugins/claude-code && claude plugin test plugins/claude-code"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.6.0"
+  }
+}

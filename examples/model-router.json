@@ -1,0 +1,61 @@
+{
+  "host": "127.0.0.1",
+  "port": 4141,
+  "log": { "mode": "metadata" },
+
+  "routers": [
+    {
+      "_comment": "Anthropic wire: Claude Code (ANTHROPIC_BASE_URL) or Copilot CLI (COPILOT_PROVIDER_TYPE=anthropic). Asks for model 'claude-auto' are routed; any other model id passes through.",
+      "alias": "claude-auto",
+      "protocol": "anthropic",
+      "upstream": { "baseUrl": "https://api.anthropic.com", "apiKeyEnv": "ANTHROPIC_API_KEY" },
+
+      "tiers": {
+        "simple":    { "model": "claude-haiku-4-5", "supportsEffort": false, "thinking": "budget", "contextWindow": 200000,
+                       "price": { "input": 1, "output": 5, "cacheWrite": 1.25, "cacheRead": 0.1 } },
+        "medium":    { "model": "claude-sonnet-5-5", "effort": "medium", "contextWindow": 1000000,
+                       "price": { "input": 2, "output": 10, "cacheWrite": 2.5, "cacheRead": 0.2 } },
+        "complex":   { "model": "claude-opus-5-5", "effort": "medium", "contextWindow": 1000000,
+                       "price": { "input": 4, "output": 20, "cacheWrite": 5, "cacheRead": 0.2 } },
+        "reasoning": { "model": "claude-opus-5-5", "effort": "high", "minEffort": "high", "contextWindow": 1000000,
+                       "price": { "input": 4, "output": 20, "cacheWrite": 5, "cacheRead": 0.2 } }
+      },
+
+      "classifiers": [
+        { "type": "decision", "url": "http://localhost:1234/v1/decisions", "model": "clef-flash", "coverage": 0.8, "timeoutMs": 3000 },
+        { "type": "llm", "provider": "anthropic", "model": "claude-haiku-4-5", "apiKeyEnv": "ANTHROPIC_API_KEY", "timeoutMs": 4000 },
+        { "type": "heuristic" }
+      ],
+
+      "keywordRules": [
+        { "keywords": ["commit message", "typo", "rename"], "tier": "simple" },
+        { "keywords": ["security review", "threat model", "race condition"], "tier": "reasoning" }
+      ],
+
+      "policy": "cache-aware",
+      "cacheTtlMs": 300000,
+      "expectedSteps": 6,
+      "classificationMode": "user_turn",
+      "contextEscalation": { "enabled": true, "buffer": 0.95 },
+      "maxTier": "reasoning",
+      "defaultTier": "medium"
+    },
+
+    {
+      "_comment": "OpenAI wire: Copilot CLI (COPILOT_PROVIDER_TYPE=openai), Codex-style clients, or any OpenAI-compatible gateway (LiteLLM, Ollama, vLLM). Swap the model ids for what your upstream serves; an effort ladder on one cheap model is often the cheapest next step before a frontier model.",
+      "alias": "auto",
+      "protocol": "openai",
+      "upstream": { "baseUrl": "https://api.openai.com/v1", "apiKeyEnv": "OPENAI_API_KEY" },
+      "tiers": {
+        "simple":    { "model": "gpt-5-mini", "effort": "low" },
+        "medium":    { "model": "gpt-5-mini", "effort": "high" },
+        "complex":   { "model": "gpt-5", "effort": "medium" },
+        "reasoning": { "model": "gpt-5", "effort": "high" }
+      },
+      "classifiers": [
+        { "type": "decision", "url": "http://localhost:1234/v1/decisions", "model": "clef-flash", "coverage": 0.8, "timeoutMs": 3000 },
+        { "type": "heuristic" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "name": "model-router",
+  "owner": {
+    "name": "Shubham Singh"
+  },
+  "description": "Prompt-complexity model routing for Claude Code.",
+  "plugins": [
+    {
+      "name": "model-router",
+      "source": "./plugins/claude-code",
+      "description": "Routes each Claude Code turn to the cheapest model tier and effort that will get it right."
+    }
+  ]
+}
